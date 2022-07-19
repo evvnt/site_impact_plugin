@@ -1,0 +1,5 @@
+<div id="<%= comp.id %>"
+     class="v-plugin v-input v-audience_selector"
+     data-plugin-callback="AudienceSelector"
+     data-audience-options="<%= raw h expand_hash(comp.audience_options).to_json %>"
+     <%= partial "components/event", locals: {comp: comp, events: comp.events} %>></div>
