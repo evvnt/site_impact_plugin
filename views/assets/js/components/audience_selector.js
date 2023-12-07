@@ -1,10 +1,8 @@
-import UsCities from './us_cities.js';
-
-class audienceSelector {
+class AudienceSelector {
   constructor(element) {
-    console.debug('\tAudienceSelector');
+    console.debug('\tSiteImpact AudienceSelector');
     this.element = element;
-    let data = JSON.parse(element.dataset.audienceOptions);
+    // let data = JSON.parse(element.dataset.audienceOptions);
   }
 
   // constructor(opts) {
@@ -40,7 +38,7 @@ class audienceSelector {
     });
 
     geocoder.geocode( { 'address': this.zip}, function(results, status) {
-      if (status == 'OK') {
+      if (status === 'OK') {
         that.mapCenter = results[0].geometry.location;
         that.map.setCenter(results[0].geometry.location);
         that.createMarkers();

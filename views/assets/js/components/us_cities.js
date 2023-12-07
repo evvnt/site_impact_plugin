@@ -4004,5 +4004,3 @@ class UsCities {
     ]
   }
 }
-
-export default UsCities;

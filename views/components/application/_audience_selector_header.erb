@@ -1,3 +1,15 @@
+<!-- foobar -->
 <script>
+  <%= raw File.read(File.expand_path('../../assets/js/components/us_cities.js', __dir__)  ) %>
   <%= raw File.read(File.expand_path('../../assets/js/components/audience_selector.js', __dir__)  ) %>
+  <%= raw File.read(File.expand_path('../../assets/js/components/email_preview.js', __dir__)  ) %>
 </script>
+
+<style>
+  .v-email_preview {
+      padding: 30px 0px;
+  }
+  .v-email_preview #v-email_preview__frame {
+      padding: 10px 0px;
+  }
+</style>

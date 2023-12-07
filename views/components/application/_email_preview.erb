@@ -1,0 +1,22 @@
+<div id="<%= comp.id %>"
+     class="v-plugin v-input v-email_preview"
+     data-plugin-callback="EmailPreview"
+     data-email-options="<%= raw h expand_hash(comp.email_preview_options).to_json %>"
+     <%= partial "components/event", locals: {comp: comp, events: comp.events} %>>
+  <button id="v-email_preview__edit"
+          class="v-button v-button--button mdc-button"
+          type="button">
+    <%= comp.button_edit_text %>
+  </button>
+  <button id="v-email_preview__save"
+          class="v-hidden v-button v-button--button mdc-button mdc-button--raised"
+          type="button">
+    <%= comp.button_save_text %>
+  </button>
+  <button id="v-email_preview__cancel"
+          class="v-hidden v-button v-button--button mdc-button"
+          type="button">
+    <%= comp.button_cancel_text %>
+  </button>
+  <iframe id="v-email_preview__frame"></iframe>
+</div>

@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+require 'coprl/presenters/dsl/components/event_base'
 
 module Coprl
   module Presenters

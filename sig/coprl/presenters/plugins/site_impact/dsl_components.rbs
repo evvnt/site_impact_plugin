@@ -1,0 +1,13 @@
+module Coprl
+  module Presenters
+    module Plugins
+      module SiteImpact
+        module DSLComponents
+          def audience_selector: -> untyped
+
+          def email_preview: -> untyped
+        end
+      end
+    end
+  end
+end

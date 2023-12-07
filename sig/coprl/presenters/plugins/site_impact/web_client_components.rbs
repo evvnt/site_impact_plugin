@@ -1,0 +1,15 @@
+module Coprl
+  module Presenters
+    module Plugins
+      module SiteImpact
+        module WebClientComponents
+          def render_audience_selector: -> untyped
+
+          def render_header_audience_selector: -> untyped
+
+          def view_dir_audience_selector: -> untyped
+        end
+      end
+    end
+  end
+end

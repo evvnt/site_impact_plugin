@@ -1,0 +1,13 @@
+module Coprl
+  module Presenters
+    module Plugins
+      module SiteImpact
+        module Components
+          class AudienceSelector
+            @audience_option: untyped
+          end
+        end
+      end
+    end
+  end
+end
