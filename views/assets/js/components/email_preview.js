@@ -2,23 +2,24 @@ class EmailPreview {
 
   constructor(element) {
     console.debug('\tSiteImpact EmailPreview');
-    this.element = element;
-    this.preview_frame = element.querySelector('#v-email_preview__frame');
-    this.edit_button = element.querySelector('#v-email_preview__edit');
-    this.cancel_button = element.querySelector('#v-email_preview__cancel');
-    this.save_button = element.querySelector('#v-email_preview__save');
+    this.previewFrame = element.querySelector('#v-email_preview__frame');
+    this.editButton = element.querySelector('#v-email_preview__edit');
+    this.cancelButton = element.querySelector('#v-email_preview__cancel');
+    this.saveButton = element.querySelector('#v-email_preview__save');
+    this.sendButton = element.querySelector('#v-email_preview__send');
     this.opts = JSON.parse(element.dataset.emailOptions);
     this.editing = false;
+    this.originalState = {}
 
     console.dir(this.opts);
 
     this.loadPreview();
-    // TODO: set iframe height
+    this.previewFrame.addEventListener('load', this.setFrameHeight.bind(this));
 
-    this.edit_button.addEventListener('click', this.toggleEditMode.bind(this));
-    this.cancel_button.addEventListener('click', this.toggleEditMode.bind(this));
-    // TODO: bind save event listener
-    // TODO: bind send event listener
+    this.editButton.addEventListener('click', this.toggleEditMode.bind(this));
+    this.cancelButton.addEventListener('click', this.cancelEdits.bind(this));
+    this.saveButton.addEventListener('click', this.saveEdits.bind(this));
+    this.sendButton.addEventListener('click', this.sendEmailPreview.bind(this));
   }
   // constructor(opts) {
   //   var self = this;
@@ -74,83 +75,76 @@ class EmailPreview {
   // }
 
   loadPreview() {
-    this.preview_frame.setAttribute("src",this.opts.preview_url)
+    this.previewFrame.setAttribute("src",this.opts.preview_url)
+  }
+
+  setFrameHeight() {
+    let height = this.previewFrame.contentWindow.document.body.scrollHeight + 'px';
+    this.previewFrame.setAttribute('height', height);
   }
 
   toggleEditMode() {
     this.editing = !this.editing;
 
     if (this.editing === true) {
-      this.edit_button.classList.add('v-hidden');
-      this.save_button.classList.remove('v-hidden');
-      this.cancel_button.classList.remove('v-hidden');
+      this.editButton.classList.add('v-hidden');
+      this.saveButton.classList.remove('v-hidden');
+      this.cancelButton.classList.remove('v-hidden');
     } else {
-      this.edit_button.classList.remove('v-hidden');
-      this.save_button.classList.add('v-hidden');
-      this.cancel_button.classList.add('v-hidden');
+      this.editButton.classList.remove('v-hidden');
+      this.saveButton.classList.add('v-hidden');
+      this.cancelButton.classList.add('v-hidden');
     }
 
     if (this.editing) {
       console.log('Editing');
-      // this.enableContentEditable();
+      this.enableContentEditable();
     } else {
       console.log('Not editing');
-      // this.disableContentEditable();
+      this.disableContentEditable();
     }
   }
 
   editableFields() {
-    return $("iframe.email-preview").contents().find('[data-contenteditable-identifier]')
+    return this.iframeBody().querySelectorAll('[data-contenteditable-identifier]')
   }
 
   bannerImage() {
-    return $("iframe.email-preview").contents().find('th.banner').find('img');
+    return this.iframeBody().querySelector('th.banner').querySelector('img');
   }
 
-  subjectField() {
-    return $('#subject');
-  }
-
-  fromField() {
-    return $('#from');
-  }
 
   iframeBody() {
-    return $("iframe.email-preview").contents().find('body');
+    return this.previewFrame.contentWindow.document.body;
   }
 
   enableContentEditable() {
-    var self = this;
 
-    self.originalState = {};
+    this.originalState = {};
 
-    self.editableFields().each(function() {
-      self.originalState[$(this).attr('data-contenteditable-identifier')] = $(this).html();
-      $(this).addClass('editing');
-      $(this).attr('contenteditable','true');
-    });
+    for (let element of this.editableFields()) {
+      this.originalState[element.dataset.contenteditableIdentifier] = element.textContent;
+      element.classList.add('editing');
+      element.setAttribute('contenteditable','true');
+    }
 
-    self.originalState['banner-image'] = self.bannerImage().parent().html();
-    self.originalState['subject'] =  self.subjectField().val();
-    self.originalState['from'] =  self.fromField().val();
-    self.bannerImage().addClass('editing');
-    self.subjectField().removeAttr('disabled');
-    self.fromField().removeAttr('disabled');
-    self.iframeBody().addClass('edit-mode');
+    // this.originalState['banner-image'] = self.bannerImage().parent().html();
+    // self.bannerImage().addClass('editing');
+
+    this.iframeBody().classList.add('edit-mode');
   }
 
   disableContentEditable() {
-    var self = this;
 
-    self.editableFields().each(function() {
-      $(this).removeClass('editing');
-      $(this).attr('contenteditable','false');
-    });
+    for (let element of this.editableFields()) {
+      this.originalState[element.dataset.contenteditableIdentifier] = element.textContent;
+      element.classList.remove('editing');
+      element.setAttribute('contenteditable','false');
+    }
 
-    self.bannerImage().removeClass('editing');
-    self.subjectField().attr('disabled', 'disabled');
-    self.fromField().attr('disabled', 'disabled');
-    self.iframeBody().removeClass('edit-mode');
+    // self.bannerImage().removeClass('editing');
+
+    this.iframeBody().classList.remove('edit-mode');
   }
 
   cancelEdits() {
@@ -158,53 +152,46 @@ class EmailPreview {
       return;
     }
 
-    var self = this;
+    for (let element of this.editableFields()) {
+      element.innerHTML = this.originalState[element.dataset.contenteditableIdentifier];
+    }
 
-    self.editableFields().each(function() {
-      $(this).html(self.originalState[$(this).attr('data-contenteditable-identifier')]);
-    });
-    self.bannerImage().parent().html(self.originalState['banner-image']);
-    self.subjectField().val(self.originalState['subject']);
-    self.fromField().val(self.originalState['from']);
+    // self.bannerImage().parent().html(self.originalState['banner-image']);
 
-    self.toggleEditMode();
+    this.toggleEditMode();
   }
 
   saveEdits() {
-    var changes = {}, self = this;
-    self.editableFields().each(function() {
-      changes[$(this).attr('data-contenteditable-identifier')] = $(this).html().trim();
-    });
+    let changes = {};
+    for (let element of this.editableFields()) {
+      changes[element.dataset.contenteditableIdentifier] = element.textContent.trim();
+    }
+    let imageId = this.bannerImage().data('id');
 
-    var image_id = self.bannerImage().data('id');
-    changes['subject'] = self.subjectField().val();
-    changes['from'] = self.fromField().val();
-
-    $.post(this.opts.persistUrl, {email_campaign_content: changes, email_campaign_image_id: image_id}, {dataType: 'json'})
-      .done(function() {
-        self.toggleEditMode();
-        self.loadPreview();
-      })
-      .fail(function() {
-        alert( "Oops - there was an error saving your changes!" );
-      });
+    // TODO: Needs to dispatch event defined in POM
+    // $.post(this.opts.persistUrl, {email_campaign_content: changes, email_campaign_image_id: imageId}, {dataType: 'json'})
+    //   .done(function() {
+    //     self.toggleEditMode();
+    //     self.loadPreview();
+    //   })
+    //   .fail(function() {
+    //     alert( "Oops - there was an error saving your changes!" );
+    //   });
   }
 
   sendEmailPreview() {
-    var $buttonText = $('#email-send-to-me span');
-    var buttonContent = $buttonText.text()
-    $buttonText.text('Sending...');
-    $.post(this.opts.previewEmailUrl, {dataType: 'json'})
-      .done(function(response) {
-        alert(response.message);
-        $buttonText.text(buttonContent);
-      })
-      .fail(function() {
-        alert( "Oops - there was an error sending your mail!" );
-      });
+    // TODO: Needs to dispatch event defined in POM
+    // var $buttonText = $('#email-send-to-me span');
+    // var buttonContent = $buttonText.text()
+    // $buttonText.text('Sending...');
+    // $.post(this.opts.previewEmailUrl, {dataType: 'json'})
+    //   .done(function(response) {
+    //     alert(response.message);
+    //     $buttonText.text(buttonContent);
+    //   })
+    //   .fail(function() {
+    //     alert( "Oops - there was an error sending your mail!" );
+    //   });
   }
 }
 
-// if (window.emailPreviewOptions) {
-//   new emailPreview(window.emailPreviewOptions);
-// }
