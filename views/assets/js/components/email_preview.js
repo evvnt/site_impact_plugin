@@ -8,18 +8,17 @@ class EmailPreview {
     this.saveButton = element.querySelector('#v-email_preview__save');
     this.sendButton = element.querySelector('#v-email_preview__send');
     this.opts = JSON.parse(element.dataset.emailOptions);
+    this.element = element;
     this.editing = false;
     this.originalState = {}
 
-    console.dir(this.opts);
-
     this.loadPreview();
-    this.previewFrame.addEventListener('load', this.setFrameHeight.bind(this));
 
+    this.previewFrame.addEventListener('load', this.setFrameHeight.bind(this));
     this.editButton.addEventListener('click', this.toggleEditMode.bind(this));
     this.cancelButton.addEventListener('click', this.cancelEdits.bind(this));
-    this.saveButton.addEventListener('click', this.saveEdits.bind(this));
-    this.sendButton.addEventListener('click', this.sendEmailPreview.bind(this));
+    this.saveButton.addEventListener('click', this.saveClickCallback());
+    this.sendButton.addEventListener('click', this.sendEmailClickCallback());
   }
   // constructor(opts) {
   //   var self = this;
@@ -28,32 +27,7 @@ class EmailPreview {
   //   self.editing = false;
   //   self.originalState = {};
   //
-  //   $("iframe.email-preview")
-  //     .on("load", function() {
-  //       $(this).css("height", $(this).contents().height() + "px");
-  //       self.bannerImage().parent().on('click', function() {
-  //         if (self.bannerImage().hasClass('editing')) {
-  //           $('#image-modal').modal('show');
-  //         }
-  //       });
-  //     });
-  //
-  //   $('#email-edit').on('click', function() {
-  //     self.toggleEditMode();
-  //   });
-  //
-  //   $('#email-edit-cancel').on('click', function() {
-  //     self.cancelEdits();
-  //   });
-  //
-  //   $('#email-edit-save').on('click', function() {
-  //     self.saveEdits();
-  //   });
-  //
-  //   $('#email-send-to-me').on('click', function() {
-  //     self.sendEmailPreview();
-  //   });
-  //
+  //    TODO: Figure out banner image selector. Allow selection of existing event images?
   //   $('#image-modal').on('show.bs.modal', function (e) {
   //     // This nasty hack should mean the slider renders.
   //     setTimeout(function(){
@@ -113,7 +87,6 @@ class EmailPreview {
     return this.iframeBody().querySelector('th.banner').querySelector('img');
   }
 
-
   iframeBody() {
     return this.previewFrame.contentWindow.document.body;
   }
@@ -161,37 +134,29 @@ class EmailPreview {
     this.toggleEditMode();
   }
 
-  saveEdits() {
-    let changes = {};
-    for (let element of this.editableFields()) {
-      changes[element.dataset.contenteditableIdentifier] = element.textContent.trim();
+  saveClickCallback() {
+    return () => {
+      let changes = {};
+      for (let element of this.editableFields()) {
+        changes[element.dataset.contenteditableIdentifier] = element.textContent.trim();
+      }
+      let imageId = this.bannerImage().dataset['id'];
+      this.dispatchEvent('save', {email_campaign_content: changes, email_campaign_image_id: imageId});
     }
-    let imageId = this.bannerImage().data('id');
-
-    // TODO: Needs to dispatch event defined in POM
-    // $.post(this.opts.persistUrl, {email_campaign_content: changes, email_campaign_image_id: imageId}, {dataType: 'json'})
-    //   .done(function() {
-    //     self.toggleEditMode();
-    //     self.loadPreview();
-    //   })
-    //   .fail(function() {
-    //     alert( "Oops - there was an error saving your changes!" );
-    //   });
   }
 
-  sendEmailPreview() {
-    // TODO: Needs to dispatch event defined in POM
-    // var $buttonText = $('#email-send-to-me span');
-    // var buttonContent = $buttonText.text()
-    // $buttonText.text('Sending...');
-    // $.post(this.opts.previewEmailUrl, {dataType: 'json'})
-    //   .done(function(response) {
-    //     alert(response.message);
-    //     $buttonText.text(buttonContent);
-    //   })
-    //   .fail(function() {
-    //     alert( "Oops - there was an error sending your mail!" );
-    //   });
+  sendEmailClickCallback() {
+    return () => {
+      this.dispatchEvent('send');
+    }
   }
+
+  dispatchEvent(name, data = undefined) {
+    console.debug(`EmailPreview: dispatch event: ${name}`);
+    console.dir(data);
+    const event = new CustomEvent(name, {composed: true, detail: data});
+    this.element.dispatchEvent(event);
+  }
+
 }
 
