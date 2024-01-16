@@ -1,5 +1,35 @@
 <div id="<%= comp.id %>"
      class="v-plugin v-input v-audience_selector"
      data-plugin-callback="AudienceSelector"
-     data-audience-options="<%= raw h expand_hash(comp.audience_options).to_json %>"
-     <%= partial "components/event", locals: {comp: comp, events: comp.events} %>></div>
+     data-audience-options="<%= raw h comp.audience_options.to_json %>"
+     data-zip-code="<%= comp.zip_code %>"
+     data-cpm="<%= comp.cpm %>"
+     data-max-radius="<%= comp.max_radius %>"
+     <%= partial "components/event", locals: {comp: comp, events: comp.events} %>>
+  <div id="audience-selector-map"></div>
+
+  <div id="v-audience_selector_slider"
+       class="v-slider v-input mdc-slider mdc-slider--discrete mdc-slider--display-markers"
+       tabindex="0"
+       role="slider"
+       data-step="1"
+       aria-valuemin="<%= comp.min_audience_selection %>"
+       aria-valuemax="<%= comp.max_audience_selection %>"
+       aria-valuenow="<%= comp.selected_audience_size %>"
+       aria-label="Select Audience Size">
+    <div class="mdc-slider__track-container">
+      <div class="mdc-slider__track"></div>
+        <div class="mdc-slider__track-marker-container"></div>
+    </div>
+    <div class="mdc-slider__thumb-container">
+        <div class="mdc-slider__pin">
+          <span class="mdc-slider__pin-value-marker"></span>
+        </div>
+      <svg class="mdc-slider__thumb" width="21" height="21">
+        <circle cx="10.5" cy="10.5" r="7.875"></circle>
+      </svg>
+      <div class="mdc-slider__focus-ring"></div>
+    </div>
+  </div>
+
+</div>

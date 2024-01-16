@@ -140,8 +140,9 @@ class EmailPreview {
       for (let element of this.editableFields()) {
         changes[element.dataset.contenteditableIdentifier] = element.textContent.trim();
       }
-      let imageId = this.bannerImage().dataset['id'];
-      this.dispatchEvent('save', {email_campaign_content: changes, email_campaign_image_id: imageId});
+      changes['email_campaign_image_id'] = this.bannerImage().dataset['id'];
+      this.dispatchEvent('save', {content: changes});
+      this.toggleEditMode();
     }
   }
 

@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require 'dry-configurable'
 require_relative 'site_impact/components/audience_selector'
 require_relative 'site_impact/components/email_preview'
 
@@ -7,6 +8,11 @@ module Coprl
   module Presenters
     module Plugins
       module SiteImpact
+
+        class Settings
+          extend Dry::Configurable
+          setting :google_api_key
+        end
 
         module DSLComponents
           def audience_selector(**attributes, &block)
@@ -25,7 +31,10 @@ module Coprl
           end
 
           def render_header_site_impact(pom, render:)
-            render.call :erb, :audience_selector_header, views: view_dir_audience_selector(pom)
+            raise 'No Google API key provided' unless Settings.config.google_api_key
+            render.call :erb, :audience_selector_header,
+                        views: view_dir_audience_selector(pom),
+                        locals: { google_api_key: Settings.config.google_api_key }
           end
 
           def render_audience_selector(comp,

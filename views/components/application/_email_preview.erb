@@ -2,7 +2,7 @@
      class="v-plugin v-input v-email_preview"
      data-plugin-callback="EmailPreview"
      data-email-options="<%= raw h expand_hash(comp.email_preview_options).to_json %>"
-     <%= partial "components/event", locals: {comp: comp, events: comp.events, parent_id: comp.event_parent_id} %>>
+     <%= partial "components/event", locals: {comp: comp, events: comp.events, parent_id: comp.event_parent_id} if comp.events&.any? %>>
   <button id="v-email_preview__edit"
           class="v-button v-button--button mdc-button"
           type="button">

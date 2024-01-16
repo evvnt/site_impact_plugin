@@ -2,12 +2,17 @@ class AudienceSelector {
   constructor(element) {
     console.debug('\tSiteImpact AudienceSelector');
     this.element = element;
-    // let data = JSON.parse(element.dataset.audienceOptions);
+    this.audienceOptions = JSON.parse(element.dataset.audienceOptions);
+    this.zipCode = element.dataset.zipCode;
+    this.cpm = element.dataset.cpm
+    this.maxRadius = element.dataset.maxRadius;
+    this.slider = element.querySelector('#v-audience_selector_slider').vComponent;
+    this.initMap();
   }
 
   // constructor(opts) {
   //   var self = this;
-  //   this.audience_options = opts.audience_options;
+  //   this.audienceOptions = opts.audience_options;
   //   this.town = opts.venue.town;
   //   this.zip = opts.venue.post_code;
   //   this.personImageUrl = opts.personImageUrl;
@@ -23,12 +28,13 @@ class AudienceSelector {
   //   this.maxRadius = opts.max_radius;
   // }
 
-  initMap() {
-    var that = this;
-    var geocoder = new google.maps.Geocoder();
+  async initMap() {
+    // let geocoder = new google.maps.Geocoder();
+    const {Geocoder} = await google.maps.importLibrary("geocoding");
+    const {Map} = await google.maps.importLibrary("maps");
 
-    that.map = new google.maps.Map(document.getElementById('audience-selector-map'), {
-      zoom: that.zoom(),
+    this.map = new google.maps.Map(this.element.querySelector('#audience-selector-map'), {
+      zoom: this.zoom(),
       zoomControl: false,
       mapTypeControl: false,
       scaleControl: false,
@@ -37,18 +43,20 @@ class AudienceSelector {
       fullscreenControl: false
     });
 
-    geocoder.geocode( { 'address': this.zip}, function(results, status) {
-      if (status === 'OK') {
-        that.mapCenter = results[0].geometry.location;
-        that.map.setCenter(results[0].geometry.location);
-        that.createMarkers();
-        that.updateSlider();
-      } else {
-        console.log('Geocode was not successful for the following reason: ' + status);
-      }
-    });
+    let geocoder = new google.maps.Geocoder();
+    geocoder.geocode({ 'address': this.zipCode})
+      .then((result) => {
+        const { results } = result;
+        this.mapCenter = results[0].geometry.location;
+        this.map.setCenter(results[0].geometry.location);
+        //this.createMarkers();
+        //this.updateSlider();
+      })
+      .catch((e) => {
+        console.log('Geocode was not successful for the following reason: ' + e);
+      });
 
-    that.centreOfUsaCoordinates = new google.maps.LatLng(39.833333, -98.585522);
+    this.centreOfUsaCoordinates = new google.maps.LatLng(39.833333, -98.585522);
   }
 
   // Update the current slider value (each time you drag the slider handle)
@@ -94,15 +102,15 @@ class AudienceSelector {
   }
 
   radius() {
-    var value = this.slider.value
-    return this.audience_options[value].radius;
+    let value = this.slider.value();
+    return this.audienceOptions[value].radius;
   }
 
   updateSlider() {
-    var value = this.slider.value
-    var radius = this.radius();
-    var count = this.audience_options[value].count;
-    var campaign_count_id = this.audience_options[value].email_campaign_count_id;
+    let value = this.slider.value();
+    let radius = this.radius();
+    let count = this.audienceOptions[value].count;
+    let campaign_count_id = this.audienceOptions[value].email_campaign_count_id;
 
     if (radius > this.maxRadius) {
       this.output.innerHTML = "'Opt-in' subscribers in the USA <span>&nbsp;</span>"
@@ -177,9 +185,9 @@ class AudienceSelector {
   createMarkers() {
     var radii = [];
 
-    for (var i = 0; i < this.audience_options.length; i ++) {
-      if (radii.indexOf(this.audience_options[i].radius) == -1) {
-        radii.push(this.audience_options[i].radius);
+    for (var i = 0; i < this.audienceOptions.length; i ++) {
+      if (radii.indexOf(this.audienceOptions[i].radius) == -1) {
+        radii.push(this.audienceOptions[i].radius);
       }
     }
 
@@ -190,9 +198,9 @@ class AudienceSelector {
 
   getMaxCountFromRadius(radius) {
     var maxFound = 0;
-    for (var i = 0; i < this.audience_options.length; i ++) {
-      if (this.audience_options[i].radius == radius && this.audience_options[i].count > maxFound) {
-        maxFound = this.audience_options[i].count;
+    for (var i = 0; i < this.audienceOptions.length; i ++) {
+      if (this.audienceOptions[i].radius == radius && this.audienceOptions[i].count > maxFound) {
+        maxFound = this.audienceOptions[i].count;
       }
     }
     return maxFound;
