@@ -5,8 +5,15 @@
      data-zip-code="<%= comp.zip_code %>"
      data-cpm="<%= comp.cpm %>"
      data-max-radius="<%= comp.max_radius %>"
+     data-selected-count-id="<%= comp.selected_count_id %>"
+     data-selected-audience-size="<%= comp.selected_audience_size %>"
      <%= partial "components/event", locals: {comp: comp, events: comp.events} %>>
-  <div id="audience-selector-map"></div>
+
+  <div style="text-align:center">
+    <h1 class="subscriber-count"></h1>
+    <h4 class="subscriber-location-message"></h4>
+    <div class="subscriber-radius-message"></div>
+  </div>
 
   <div id="v-audience_selector_slider"
        class="v-slider v-input mdc-slider mdc-slider--discrete mdc-slider--display-markers"
@@ -15,7 +22,7 @@
        data-step="1"
        aria-valuemin="<%= comp.min_audience_selection %>"
        aria-valuemax="<%= comp.max_audience_selection %>"
-       aria-valuenow="<%= comp.selected_audience_size %>"
+       aria-valuenow="<%= comp.slider_selection %>"
        aria-label="Select Audience Size">
     <div class="mdc-slider__track-container">
       <div class="mdc-slider__track"></div>
@@ -31,5 +38,10 @@
       <div class="mdc-slider__focus-ring"></div>
     </div>
   </div>
+
+  <div id="audience-selector-map" style="height: 300px;"></div>
+  <input id="selected_email_campaign_count_id" class="input" type="hidden" name="selected_email_campaign_count_id" value="" />
+  <input id="selected_audience_size" class="input" type="hidden" name="selected_audience_size" value="" />
+  <input id="price_in_cents" class="input" type="hidden" name="price_in_cents" value="" />
 
 </div>

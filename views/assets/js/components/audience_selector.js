@@ -4,29 +4,30 @@ class AudienceSelector {
     this.element = element;
     this.audienceOptions = JSON.parse(element.dataset.audienceOptions);
     this.zipCode = element.dataset.zipCode;
+    this.formattedAddress = '';
     this.cpm = element.dataset.cpm
     this.maxRadius = element.dataset.maxRadius;
+    this.selectedCountId = element.dataset.selectedCountId;
+    this.selectedAudienceSize = element.dataset.selectedAudienceSize;
+    this.amountInCents = element.dataset.priceInCents;
+    this.markers = {}
+
     this.slider = element.querySelector('#v-audience_selector_slider').vComponent;
-    this.initMap();
+    this.subscriberCount = element.querySelector('.subscriber-count');
+    this.subscriberLocationMsg = element.querySelector('.subscriber-location-message');
+    this.subscriberRadiusMsg = element.querySelector('.subscriber-radius-message');
+    this.priceDisplay = element.querySelector('.campaign-price');
+
+    element.querySelector('#v-audience_selector_slider').addEventListener('MDCSlider:change', this.updateSlider.bind(this));
+
+    this.initMap().then(r => console.log('map initialized'));
   }
 
-  // constructor(opts) {
-  //   var self = this;
-  //   this.audienceOptions = opts.audience_options;
-  //   this.town = opts.venue.town;
-  //   this.zip = opts.venue.post_code;
-  //   this.personImageUrl = opts.personImageUrl;
-  //   this.slider = document.getElementById("range");
-  //   this.output = document.getElementById("range-value");
-  //   this.audienceCount = document.getElementById("audience-count");
-  //   this.slider.oninput = function() {
-  //     self.updateSlider();
-  //   };
-  //   this.pcm = opts.pcm;
-  //   this.updateSlider();
-  //   this.markers = {};
-  //   this.maxRadius = opts.max_radius;
-  // }
+  prepareSubmit(params) {
+    params.push(['selected_event_email_campaign_count_id', this.selectedCountId]);
+    params.push(['selected_audience_size', this.selectedAudienceSize]);
+    params.push(['amount_in_cents', this.amountInCents]);
+  }
 
   async initMap() {
     // let geocoder = new google.maps.Geocoder();
@@ -49,8 +50,9 @@ class AudienceSelector {
         const { results } = result;
         this.mapCenter = results[0].geometry.location;
         this.map.setCenter(results[0].geometry.location);
-        //this.createMarkers();
-        //this.updateSlider();
+        this.formattedAddress = results[0].formatted_address
+        this.createMarkers();
+        this.updateSlider();
       })
       .catch((e) => {
         console.log('Geocode was not successful for the following reason: ' + e);
@@ -97,7 +99,6 @@ class AudienceSelector {
     if (this.radius() > this.maxRadius) {
       return this.centreOfUsaCoordinates ;
     }
-
     return this.mapCenter;
   }
 
@@ -110,38 +111,30 @@ class AudienceSelector {
     let value = this.slider.value();
     let radius = this.radius();
     let count = this.audienceOptions[value].count;
-    let campaign_count_id = this.audienceOptions[value].email_campaign_count_id;
+
+    this.selectedCountId = this.audienceOptions[value].email_campaign_count_id;
+    this.selectedAudienceSize = count;
+    this.amountInCents = (count * this.cpm) / 100;
 
     if (radius > this.maxRadius) {
-      this.output.innerHTML = "'Opt-in' subscribers in the USA <span>&nbsp;</span>"
-      $('#loc-perk').html(loc.replace("located ", "Subscribers in the USA"));
+      this.subscriberLocationMsg.innerHTML = "'Opt-in' subscribers in the USA <span>&nbsp;</span>"
     }
     else {
-      if (radius > 0) {
-        var loc = "located within " + radius + " miles of zip code " + this.zip;
-      }
-      else {
-        var loc = "located in zip code " + this.zip;
-      }
-
-      this.output.innerHTML = "'Opt-in' subscribers in or near " + this.town + "<span>(" + loc + ")</span>"
-      $('#loc-perk').html(loc.replace("located ", ""));
+      let loc = (radius > 0) ? "located within " + radius + " miles of zip code " + this.zipCode : "located in zip code " + this.zipCode;
+      this.subscriberLocationMsg.innerHTML = "'Opt-in' subscribers in or near " + this.formattedAddress;
+      this.subscriberRadiusMsg.innerHTML = "(" + loc + ")";
     }
 
-    $('#audience-size-perk').html(this.numberWithCommas(count) + ' Subscribers')
-
-    this.audienceCount.innerHTML = this.numberWithCommas(count);
-
-    $('.info-box h2').html(this.numberWithCommas(((count * this.pcm) / 1000)));
-
-    document.getElementById("email_campaign_selected_email_campaign_count_id").value = campaign_count_id;
-    document.getElementById("email_campaign_selected_audience_size").value = count;
+    this.subscriberCount.innerHTML = this.numberWithCommas(count);
+    if (this.priceDisplay) {
+      this.priceDisplay.innerHTML = this.numberWithCommas(this.amountInCents / 100);
+    }
 
     if (this.map) {
-      if (this.map.getZoom() != this.zoom()) {
+      if (this.map.getZoom() !== this.zoom()) {
         // Clear all markers and start again.
-        for (var radiusEach in this.markers) {
-          for (var i = 0; i < this.markers[radiusEach].length; i++) {
+        for (let radiusEach in this.markers) {
+          for (let i = 0; i < this.markers[radiusEach].length; i++) {
             if (this.markers[radiusEach] && this.markers[radiusEach][i]) {
               this.markers[radiusEach][i].setMap(null);
             }
@@ -152,15 +145,10 @@ class AudienceSelector {
       this.map.setZoom(this.zoom());
       this.map.setCenter(this.mapCenterCoordinates());
 
-      if (this.radius() > this.maxRadius) {
-        var markerCount = count / 50;
-      }
-      else {
-        var markerCount = count / 10;
-      }
+      let markerCount = (this.radius() > this.maxRadius) ? count / 50 : count / 10;
 
       // Now show only the right number of markers
-      for (var i = 0; i < this.markers[radius].length; i ++) {
+      for (let i = 0; i < this.markers[radius].length; i ++) {
         if (this.markers[radius] && this.markers[radius][i]) {
           if (i < markerCount) {
             this.markers[radius][i].setMap(this.map);
@@ -174,19 +162,14 @@ class AudienceSelector {
   }
 
   getIcon() {
-    if (Math.random() < 0.5) {
-      return 'http://maps.google.com/mapfiles/ms/micons/man.png'
-    }
-    else {
-      return 'http://maps.google.com/mapfiles/ms/micons/woman.png'
-    }
+    const icon = (Math.random() < 0.5) ? 'man.png' : 'woman.png';
+    return 'http://maps.google.com/mapfiles/ms/micons/' + icon;
   }
 
   createMarkers() {
-    var radii = [];
-
-    for (var i = 0; i < this.audienceOptions.length; i ++) {
-      if (radii.indexOf(this.audienceOptions[i].radius) == -1) {
+    let radii = [];
+    for (let i = 0; i < this.audienceOptions.length; i ++) {
+      if (radii.indexOf(this.audienceOptions[i].radius) === -1) {
         radii.push(this.audienceOptions[i].radius);
       }
     }
@@ -197,7 +180,7 @@ class AudienceSelector {
   }
 
   getMaxCountFromRadius(radius) {
-    var maxFound = 0;
+    let maxFound = 0;
     for (var i = 0; i < this.audienceOptions.length; i ++) {
       if (this.audienceOptions[i].radius == radius && this.audienceOptions[i].count > maxFound) {
         maxFound = this.audienceOptions[i].count;
@@ -212,24 +195,19 @@ class AudienceSelector {
     }
 
     // We could do some sort of lookup to improve this.
-    var assumed_zip_code_radius = 0.5;
-
-    var markers = [];
-
-    var randUnit = (radius + assumed_zip_code_radius) / 55;
-    var markerCount = this.getMaxCountFromRadius(radius) / 10;
+    const assumed_zip_code_radius = 0.5;
+    let markers = [];
+    const randUnit = (radius + assumed_zip_code_radius) / 55;
+    let markerCount = this.getMaxCountFromRadius(radius) / 10;
 
     if (markerCount > 2000) {
       markerCount = 2000;
     }
 
-    var image = 'https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png'
-
     while (markers.length < markerCount) {
-      var lat = this.getRandomInRange(this.mapCenter.lat() - randUnit, this.mapCenter.lat() + randUnit, 6)
-      var lng = this.getRandomInRange(this.mapCenter.lng() - randUnit, this.mapCenter.lng() + randUnit, 6)
-
-      var dist = this.haversineDistance([this.mapCenter.lng(), this.mapCenter.lat()], [lng, lat], true)
+      const lat = this.getRandomInRange(this.mapCenter.lat() - randUnit, this.mapCenter.lat() + randUnit, 6);
+      const lng = this.getRandomInRange(this.mapCenter.lng() - randUnit, this.mapCenter.lng() + randUnit, 6);
+      const dist = this.haversineDistance([this.mapCenter.lng(), this.mapCenter.lat()], [lng, lat], true);
 
       if (dist <= radius + assumed_zip_code_radius) {
         markers.push(new google.maps.Marker({
@@ -243,23 +221,23 @@ class AudienceSelector {
   }
 
   countryWideMarkers(radius) {
-    var markerCount = this.getMaxCountFromRadius(radius) / 10;
+    let markerCount = this.getMaxCountFromRadius(radius) / 10;
     if (markerCount > 10000) {
       markerCount = 10000;
     }
-    var markers = [];
+    let markers = [];
 
-    var usCities = new UsCities;
-    var cities = usCities.cities();
-    var randUnit = 1;
+    const usCities = new UsCities;
+    const cities = usCities.cities();
+    const randUnit = 1;
 
     while (markers.length < markerCount) {
-      for (var i = 0; i < cities.length; i++) {
-        var cityLat = cities[i]['Coordinates'].split(',')[0];
-        var cityLng = cities[i]['Coordinates'].split(',')[1];
+      for (let i = 0; i < cities.length; i++) {
+        const cityLat = cities[i]['Coordinates'].split(',')[0];
+        const cityLng = cities[i]['Coordinates'].split(',')[1];
 
-        var lat = this.getRandomInRange(cityLat - randUnit, cityLat + randUnit, 6)
-        var lng = this.getRandomInRange(cityLng - randUnit, cityLng + randUnit, 6)
+        const lat = this.getRandomInRange(cityLat - randUnit, cityLat + randUnit, 6)
+        const lng = this.getRandomInRange(cityLng - randUnit, cityLng + randUnit, 6)
 
         markers.push(new google.maps.Marker({
           position: new google.maps.LatLng(lat, lng),
@@ -277,23 +255,23 @@ class AudienceSelector {
       return x * Math.PI / 180;
     }
 
-    var lon1 = coords1[0];
-    var lat1 = coords1[1];
+    const lon1 = coords1[0];
+    const lat1 = coords1[1];
 
-    var lon2 = coords2[0];
-    var lat2 = coords2[1];
+    const lon2 = coords2[0];
+    const lat2 = coords2[1];
 
-    var R = 6371; // km
+    const R = 6371; // km
 
-    var x1 = lat2 - lat1;
-    var dLat = toRad(x1);
-    var x2 = lon2 - lon1;
-    var dLon = toRad(x2)
-    var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    const x1 = lat2 - lat1;
+    const dLat = toRad(x1);
+    const x2 = lon2 - lon1;
+    const dLon = toRad(x2)
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
       Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
       Math.sin(dLon / 2) * Math.sin(dLon / 2);
-    var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    var d = R * c;
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    let d = R * c;
 
     if(isMiles) d /= 1.60934;
 
