@@ -16,7 +16,10 @@ class AudienceSelector {
     this.subscriberCount = element.querySelector('.subscriber-count');
     this.subscriberLocationMsg = element.querySelector('.subscriber-location-message');
     this.subscriberRadiusMsg = element.querySelector('.subscriber-radius-message');
-    this.priceDisplay = element.querySelector('.campaign-price');
+
+    let externalPriceElementId = element.dataset.externalPriceElement;
+    this.priceDisplay = document.querySelector('#' + externalPriceElementId);
+    this.currencyCode = element.dataset.currencyCode;
 
     element.querySelector('#v-audience_selector_slider').addEventListener('MDCSlider:change', this.updateSlider.bind(this));
 
@@ -30,7 +33,6 @@ class AudienceSelector {
   }
 
   async initMap() {
-    // let geocoder = new google.maps.Geocoder();
     const {Geocoder} = await google.maps.importLibrary("geocoding");
     const {Map} = await google.maps.importLibrary("maps");
 
@@ -127,7 +129,11 @@ class AudienceSelector {
 
     this.subscriberCount.innerHTML = this.numberWithCommas(count);
     if (this.priceDisplay) {
-      this.priceDisplay.innerHTML = this.numberWithCommas(this.amountInCents / 100);
+      let currencyFormat = new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: this.currencyCode,
+      });
+      this.priceDisplay.innerHTML = currencyFormat.format(this.amountInCents / 100);
     }
 
     if (this.map) {
@@ -182,7 +188,7 @@ class AudienceSelector {
   getMaxCountFromRadius(radius) {
     let maxFound = 0;
     for (var i = 0; i < this.audienceOptions.length; i ++) {
-      if (this.audienceOptions[i].radius == radius && this.audienceOptions[i].count > maxFound) {
+      if (this.audienceOptions[i].radius === radius && this.audienceOptions[i].count > maxFound) {
         maxFound = this.audienceOptions[i].count;
       }
     }
