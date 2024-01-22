@@ -2,6 +2,7 @@
      class="v-plugin v-input v-audience_selector"
      data-plugin-callback="AudienceSelector"
      data-audience-options="<%= raw h comp.audience_options.to_json %>"
+     data-audience-ready-url="<%= comp.audience_ready_url %>"
      data-zip-code="<%= comp.zip_code %>"
      data-cpm="<%= comp.cpm %>"
      data-max-radius="<%= comp.max_radius %>"
@@ -17,31 +18,49 @@
     <div class="subscriber-radius-message"></div>
   </div>
 
-  <div id="v-audience_selector_slider"
-       class="v-slider v-input mdc-slider mdc-slider--discrete mdc-slider--display-markers"
-       tabindex="0"
-       role="slider"
-       data-step="1"
-       aria-valuemin="<%= comp.min_audience_selection %>"
-       aria-valuemax="<%= comp.max_audience_selection %>"
-       aria-valuenow="<%= comp.slider_selection %>"
-       aria-label="Select Audience Size">
-    <div class="mdc-slider__track-container">
-      <div class="mdc-slider__track"></div>
-        <div class="mdc-slider__track-marker-container"></div>
+  <div id="v-audience-selector-container" class="v-hidden">
+    <div id="v-audience_selector_slider"
+         class="v-slider v-input mdc-slider mdc-slider--discrete mdc-slider--display-markers"
+         tabindex="0"
+         role="slider"
+         data-step="1"
+         aria-valuemin="<%= comp.min_audience_selection %>"
+         aria-valuemax="<%= comp.max_audience_selection %>"
+         aria-valuenow="<%= comp.slider_selection %>"
+         aria-label="Select Audience Size">
+      <div class="mdc-slider__track-container">
+        <div class="mdc-slider__track"></div>
+          <div class="mdc-slider__track-marker-container"></div>
+      </div>
+      <div class="mdc-slider__thumb-container">
+          <div class="mdc-slider__pin">
+            <span class="mdc-slider__pin-value-marker"></span>
+          </div>
+        <svg class="mdc-slider__thumb" width="21" height="21">
+          <circle cx="10.5" cy="10.5" r="7.875"></circle>
+        </svg>
+        <div class="mdc-slider__focus-ring"></div>
+      </div>
     </div>
-    <div class="mdc-slider__thumb-container">
-        <div class="mdc-slider__pin">
-          <span class="mdc-slider__pin-value-marker"></span>
-        </div>
-      <svg class="mdc-slider__thumb" width="21" height="21">
-        <circle cx="10.5" cy="10.5" r="7.875"></circle>
-      </svg>
-      <div class="mdc-slider__focus-ring"></div>
-    </div>
+    <div id="audience-selector-map" style="height: 300px;"></div>
   </div>
 
-  <div id="audience-selector-map" style="height: 300px;"></div>
+  <% if comp.audience_ready_url %>
+    <div id="v-audience-ready-container" class="v-padding--top3 v-padding--bottom3">
+      <h5 class="v-content--align-center" style="width: 100%;"><%= comp.audience_pending_message %></h5>
+      <div id="v-audience_selector_progress" role="progressbar" class="v-progress mdc-linear-progress mdc-linear-progress--indeterminate mdc-linear-progress--closed"
+           data-hidden="false">
+        <div class="mdc-linear-progress__buffering-dots"></div>
+        <div class="mdc-linear-progress__buffer"></div>
+        <div class="mdc-linear-progress__bar mdc-linear-progress__primary-bar">
+          <span class="mdc-linear-progress__bar-inner"></span>
+        </div>
+        <div class="mdc-linear-progress__bar mdc-linear-progress__secondary-bar">
+          <span class="mdc-linear-progress__bar-inner"></span>
+        </div>
+      </div>
+    </div>
+  <% end %>
   <input id="selected_email_campaign_count_id" class="input" type="hidden" name="selected_email_campaign_count_id" value="" />
   <input id="selected_audience_size" class="input" type="hidden" name="selected_audience_size" value="" />
   <input id="price_in_cents" class="input" type="hidden" name="price_in_cents" value="" />

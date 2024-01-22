@@ -3,6 +3,7 @@ class AudienceSelector {
     console.debug('\tSiteImpact AudienceSelector');
     this.element = element;
     this.audienceOptions = JSON.parse(element.dataset.audienceOptions);
+    this.audienceReadyUrl = element.dataset.audienceReadyUrl;
     this.zipCode = element.dataset.zipCode;
     this.formattedAddress = '';
     this.cpm = element.dataset.cpm
@@ -23,7 +24,48 @@ class AudienceSelector {
 
     element.querySelector('#v-audience_selector_slider').addEventListener('MDCSlider:change', this.updateSlider.bind(this));
 
-    this.initMap().then(r => console.log('map initialized'));
+    if (this.audienceReadyUrl) {
+      this.pollForReady().then(r => {
+        this.audienceOptions = r.audience_options;
+        this.initMap().then(r => console.log('map initialized'));
+      });
+    } else {
+      this.initMap().then(r => console.log('map initialized'));
+    }
+  }
+
+  async pollForReady() {
+    let result = await this.getAudienceStatus();
+    console.dir(result);
+    while (result.ready !== true) {
+      await this.wait();
+      result = await this.getAudienceStatus();
+    }
+    return result;
+  }
+
+  wait(ms = 1000) {
+    return new Promise(resolve => {
+      console.log(`waiting ${ms} ms...`);
+      setTimeout(resolve, ms);
+    });
+  }
+
+  getAudienceStatus() {
+    const httpRequest = new XMLHttpRequest();
+    httpRequest.open('GET', this.audienceReadyUrl, false);
+    let response = {ready: false};
+    httpRequest.onreadystatechange = function() {
+      if (httpRequest.readyState === XMLHttpRequest.DONE){
+        response =  JSON.parse(httpRequest.response);
+      } else {
+        console.log(`Error ${httpRequest.status}: ${httpRequest.statusText}`);
+      }
+    };
+    httpRequest.setRequestHeader('X-NO-LAYOUT', true);
+    httpRequest.send();
+    console.dir(response);
+    return response;
   }
 
   prepareSubmit(params) {
@@ -35,7 +77,8 @@ class AudienceSelector {
   async initMap() {
     const {Geocoder} = await google.maps.importLibrary("geocoding");
     const {Map} = await google.maps.importLibrary("maps");
-
+    this.element.querySelector('#v-audience-selector-container').classList.remove('v-hidden');
+    this.element.querySelector('#v-audience-ready-container').classList.add('v-hidden');
     this.map = new google.maps.Map(this.element.querySelector('#audience-selector-map'), {
       zoom: this.zoom(),
       zoomControl: false,
