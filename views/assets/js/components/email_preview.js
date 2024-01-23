@@ -62,10 +62,12 @@ class EmailPreview {
 
     if (this.editing === true) {
       this.editButton.classList.add('v-hidden');
+      this.sendButton.classList.add('v-hidden');
       this.saveButton.classList.remove('v-hidden');
       this.cancelButton.classList.remove('v-hidden');
     } else {
       this.editButton.classList.remove('v-hidden');
+      this.sendButton.classList.remove('v-hidden');
       this.saveButton.classList.add('v-hidden');
       this.cancelButton.classList.add('v-hidden');
     }
