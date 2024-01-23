@@ -16,7 +16,7 @@ module Coprl
               @button_edit_text = attribs.delete(:button_edit_text){ 'Edit' }
               @button_save_text = attribs.delete(:button_save_text){ 'Save' }
               @button_cancel_text = attribs.delete(:button_cancel_text){ 'Cancel' }
-              @button_send_text = attribs.delete(:button_send_text){ 'Send to Me' }
+              @button_send_text = attribs.delete(:button_send_text){ nil }
               @button_color = attribs.delete(:button_color){ :primary }
               @component_options = %i(preview_url persist_url preview_email_url)
               super(type: :email_preview, **attribs, &block)

@@ -20,7 +20,8 @@
   </button>
   <button id="v-email_preview__send"
           class="v-button v-button--button mdc-button"
-          type="button">
+          type="button"
+          <% if comp.button_send_text.nil? %>style="display: none;"<% end %>>
     <%= comp.button_send_text %>
   </button>
   <iframe id="v-email_preview__frame"></iframe>
