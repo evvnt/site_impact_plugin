@@ -8,7 +8,7 @@ Gem::Specification.new do |spec|
   spec.authors = ["Derek Graham"]
   spec.email = ["derek@evvnt.com"]
 
-  spec.summary = "A COPRL plugin that provides an audience selector for a SiteImpact email campaign"
+  spec.summary = "A COPRL plugin that provides an audience selector and email editor for a SiteImpact email campaign"
   spec.homepage = "https://github.com/evvnt/site_impact_plugin"
   spec.license = "MIT"
   spec.required_ruby_version = ">= 2.6.0"
@@ -31,8 +31,7 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
   spec.add_runtime_dependency 'dry-configurable', '>0.1', '<= 7.0'
 
-  # Uncomment to register a new dependency of your gem
-  # spec.add_dependency "example-gem", "~> 1.0"
+  spec.add_development_dependency "bundler", "~> 2.0"
 
   # For more information and examples about making a new gem, check out our
   # guide at: https://bundler.io/guides/creating_gem.html
