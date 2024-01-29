@@ -159,7 +159,7 @@ class AudienceSelector {
 
     this.selectedCountId = this.audienceOptions[value].email_campaign_count_id;
     this.selectedAudienceSize = count;
-    this.amountInCents = (count * this.cpm) / 100;
+    this.amountInCents = (count * this.cpm) / 1000;
 
     if (radius > this.maxRadius) {
       this.subscriberLocationMsg.innerHTML = "'Opt-in' subscribers in the USA <span>&nbsp;</span>"

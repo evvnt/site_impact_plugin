@@ -9,44 +9,20 @@ class EmailPreview {
     this.sendButton = element.querySelector('#v-email_preview__send');
     this.opts = JSON.parse(element.dataset.emailOptions);
     this.element = element;
+    this.viewOnly = element.dataset.viewOnly;
     this.editing = false;
     this.originalState = {}
 
     this.loadPreview();
 
-    this.previewFrame.addEventListener('load', this.setFrameHeight.bind(this));
-    this.editButton.addEventListener('click', this.toggleEditMode.bind(this));
-    this.cancelButton.addEventListener('click', this.cancelEdits.bind(this));
-    this.saveButton.addEventListener('click', this.saveClickCallback());
+    if (!this.viewOnly) {
+      this.previewFrame.addEventListener('load', this.setFrameHeight.bind(this));
+      this.editButton.addEventListener('click', this.toggleEditMode.bind(this));
+      this.cancelButton.addEventListener('click', this.cancelEdits.bind(this));
+      this.saveButton.addEventListener('click', this.saveClickCallback());
+    }
     this.sendButton.addEventListener('click', this.sendEmailClickCallback());
   }
-  // constructor(opts) {
-  //   var self = this;
-  //   self.opts = opts;
-  //
-  //   self.editing = false;
-  //   self.originalState = {};
-  //
-  //    TODO: Figure out banner image selector. Allow selection of existing event images?
-  //   $('#image-modal').on('show.bs.modal', function (e) {
-  //     // This nasty hack should mean the slider renders.
-  //     setTimeout(function(){
-  //       window.dispatchEvent(new Event('resize'));
-  //     }, 500);
-  //   });
-  //
-  //   $('#image-modal-select').on('click', function() {
-  //     self.bannerImage().attr('src', $('.slick-current img').attr('src'))
-  //     self.bannerImage().attr('data-id', $('.slick-current img').data('id'))
-  //     $('#image-modal').modal('hide');
-  //   });
-  //
-  //   $('#image-modal-cancel').on('click', function() {
-  //     $('#image-modal').modal('hide');
-  //   });
-  //
-  //   this.loadPreview();
-  // }
 
   loadPreview() {
     this.previewFrame.setAttribute("src",this.opts.preview_url)

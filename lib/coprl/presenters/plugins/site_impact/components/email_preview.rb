@@ -8,7 +8,7 @@ module Coprl
         module Components
           class EmailPreview < DSL::Components::EventBase
             attr_reader :preview_url, :persist_url, :preview_email_url, :button_edit_text, :button_save_text,
-                        :button_cancel_text, :button_send_text, :button_color
+                        :button_cancel_text, :button_send_text, :button_color, :view_only
             def initialize(**attribs, &block)
               @preview_url = attribs.delete(:preview_url)
               @persist_url = attribs.delete(:persist_url)
@@ -18,6 +18,7 @@ module Coprl
               @button_cancel_text = attribs.delete(:button_cancel_text){ 'Cancel' }
               @button_send_text = attribs.delete(:button_send_text){ nil }
               @button_color = attribs.delete(:button_color){ :primary }
+              @view_only = attribs.delete(:view_only){ false }
               @component_options = %i(preview_url persist_url preview_email_url)
               super(type: :email_preview, **attribs, &block)
               expand!
