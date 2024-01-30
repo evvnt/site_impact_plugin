@@ -15,12 +15,14 @@ class EmailPreview {
 
     this.loadPreview();
 
-    if (!this.viewOnly) {
-      this.previewFrame.addEventListener('load', this.setFrameHeight.bind(this));
+    this.previewFrame.addEventListener('load', this.setFrameHeight.bind(this));
+
+    if (this.viewOnly === 'false') {
       this.editButton.addEventListener('click', this.toggleEditMode.bind(this));
       this.cancelButton.addEventListener('click', this.cancelEdits.bind(this));
       this.saveButton.addEventListener('click', this.saveClickCallback());
     }
+
     this.sendButton.addEventListener('click', this.sendEmailClickCallback());
   }
 
