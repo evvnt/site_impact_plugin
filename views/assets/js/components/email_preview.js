@@ -64,7 +64,7 @@ class EmailPreview {
   }
 
   bannerImage() {
-    return this.iframeBody().querySelector('th.banner').querySelector('img');
+    return this.iframeBody().querySelector('th.banner')?.querySelector('img');
   }
 
   iframeBody() {
@@ -120,7 +120,7 @@ class EmailPreview {
       for (let element of this.editableFields()) {
         changes[element.dataset.contenteditableIdentifier] = element.textContent.trim();
       }
-      changes['email_campaign_image_id'] = this.bannerImage().dataset['id'];
+      changes['email_campaign_image_id'] = this.bannerImage()?.dataset['id'];
       this.dispatchEvent('save', {content: changes});
       this.toggleEditMode();
     }
