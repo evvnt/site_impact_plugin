@@ -72,6 +72,7 @@ class AudienceSelector {
     params.push(['selected_event_email_campaign_count_id', this.selectedCountId]);
     params.push(['selected_audience_size', this.selectedAudienceSize]);
     params.push(['amount_in_cents', this.amountInCents]);
+    params.push(['location_description', this.formattedAddress])
   }
 
   async initMap() {
