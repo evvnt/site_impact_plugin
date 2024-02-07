@@ -6,6 +6,7 @@ class AudienceSelector {
     this.audienceReadyUrl = element.dataset.audienceReadyUrl;
     this.zipCode = element.dataset.zipCode;
     this.formattedAddress = '';
+    this.shortAddress = '';
     this.cpm = element.dataset.cpm
     this.maxRadius = element.dataset.maxRadius;
     this.selectedCountId = element.dataset.selectedCountId;
@@ -72,7 +73,7 @@ class AudienceSelector {
     params.push(['selected_event_email_campaign_count_id', this.selectedCountId]);
     params.push(['selected_audience_size', this.selectedAudienceSize]);
     params.push(['amount_in_cents', this.amountInCents]);
-    params.push(['location_description', this.formattedAddress])
+    params.push(['location_description', this.shortAddress])
   }
 
   async initMap() {
@@ -96,7 +97,7 @@ class AudienceSelector {
         const { results } = result;
         this.mapCenter = results[0].geometry.location;
         this.map.setCenter(results[0].geometry.location);
-        this.formattedAddress = results[0].formatted_address
+        this.setAddress(results[0]);
         this.createMarkers();
         this.updateSlider();
       })
@@ -105,6 +106,26 @@ class AudienceSelector {
       });
 
     this.centreOfUsaCoordinates = new google.maps.LatLng(39.833333, -98.585522);
+  }
+
+  setAddress(result) {
+    let city = '';
+    let state = '';
+    this.formattedAddress = result.formatted_address
+
+    for (const component of result.address_components) {
+      switch (component.types[0]) {
+        case 'locality': {
+          city = component.long_name;
+          break;
+        }
+        case 'administrative_area_level_1': {
+          state = component.short_name;
+          break;
+        }
+      }
+    }
+    this.shortAddress = city +  ', ' + state;
   }
 
   // Update the current slider value (each time you drag the slider handle)
@@ -231,7 +252,7 @@ class AudienceSelector {
 
   getMaxCountFromRadius(radius) {
     let maxFound = 0;
-    for (var i = 0; i < this.audienceOptions.length; i ++) {
+    for (let i = 0; i < this.audienceOptions.length; i ++) {
       if (this.audienceOptions[i].radius === radius && this.audienceOptions[i].count > maxFound) {
         maxFound = this.audienceOptions[i].count;
       }
