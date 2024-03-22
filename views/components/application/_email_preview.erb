@@ -1,7 +1,7 @@
 <div id="<%= comp.id %>"
      class="v-plugin v-input v-email_preview"
      data-plugin-callback="EmailPreview"
-     data-email-options="<%= raw h expand_hash(comp.email_preview_options).to_json %>"
+     data-email-options="<%= expand_hash(comp.email_preview_options).to_json %>"
      data-view-only="<%= comp.view_only %>"
      <%= partial "components/event", locals: {comp: comp, events: comp.events, parent_id: comp.event_parent_id} if comp.events&.any? %>>
   <% if !comp.view_only %>

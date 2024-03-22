@@ -26,14 +26,14 @@ module Coprl
 
         module WebClientComponents
 
-          def view_dir_audience_selector(_pom)
+          def view_dir_site_impact(_pom)
             File.join(__dir__, '../../../..', 'views', 'components')
           end
 
           def render_header_site_impact(pom, render:)
             raise 'No Google API key provided' unless Settings.config.google_api_key
             render.call :erb, :audience_selector_header,
-                        views: view_dir_audience_selector(pom),
+                        views: view_dir_site_impact(pom),
                         locals: { google_api_key: Settings.config.google_api_key }
           end
 
@@ -41,7 +41,7 @@ module Coprl
                                        render:,
                                        components:,
                                        index:)
-            render.call :erb, :audience_selector, views: view_dir_audience_selector(comp),
+            render.call :erb, :audience_selector, views: view_dir_site_impact(comp),
                         locals: {comp: comp,
                                  components: components,
                                  index: index}
@@ -51,7 +51,7 @@ module Coprl
                                        render:,
                                        components:,
                                        index:)
-            render.call :erb, :email_preview, views: view_dir_audience_selector(comp),
+            render.call :erb, :email_preview, views: view_dir_site_impact(comp),
                         locals: {comp: comp,
                                  components: components,
                                  index: index}
