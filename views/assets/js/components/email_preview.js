@@ -8,6 +8,7 @@ class EmailPreview {
     this.saveButton = element.querySelector('#v-email_preview__save');
     this.sendButton = element.querySelector('#v-email_preview__send');
     this.opts = JSON.parse(element.dataset.emailOptions);
+    this.maxHeight = element.dataset.maxHeight;
     this.element = element;
     this.viewOnly = element.dataset.viewOnly;
     this.editing = false;
@@ -31,8 +32,11 @@ class EmailPreview {
   }
 
   setFrameHeight() {
-    let height = this.previewFrame.contentWindow.document.body.scrollHeight + 'px';
-    this.previewFrame.setAttribute('height', height);
+    if (this.maxHeight) {
+      this.previewFrame.setAttribute('height', this.maxHeight);
+    } else {
+      this.previewFrame.setAttribute('height', this.previewFrame.contentWindow.document.body.scrollHeight + 'px');
+    }
   }
 
   toggleEditMode() {
