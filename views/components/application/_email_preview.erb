@@ -3,6 +3,7 @@
      data-plugin-callback="EmailPreview"
      data-email-options="<%= expand_hash(comp.email_preview_options).to_json %>"
      data-view-only="<%= comp.view_only %>"
+     data-max-height="<%= comp.max_height %>"
      <%= partial "components/event", locals: {comp: comp, events: comp.events, parent_id: comp.event_parent_id} if comp.events&.any? %>>
   <% if !comp.view_only %>
     <button id="v-email_preview__edit"
