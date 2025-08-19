@@ -8,10 +8,12 @@ class AudienceSelector {
     this.formattedAddress = '';
     this.shortAddress = '';
     this.cpm = element.dataset.cpm
+    this.discountCpm = element.dataset.discountCpm
     this.maxRadius = element.dataset.maxRadius;
     this.selectedCountId = element.dataset.selectedCountId;
     this.selectedAudienceSize = element.dataset.selectedAudienceSize;
     this.amountInCents = element.dataset.priceInCents;
+    this.discountAmountInCents = 0;
     this.markers = {}
 
     this.slider = element.querySelector('#v-audience_selector_slider').vComponent;
@@ -21,6 +23,7 @@ class AudienceSelector {
 
     let externalPriceElementId = element.dataset.externalPriceElement;
     this.priceDisplay = document.querySelector('#' + externalPriceElementId);
+    this.originalPriceDisplay = document.querySelector('#' + externalPriceElementId + "-original");
     this.currencyCode = element.dataset.currencyCode;
 
     element.querySelector('#v-audience_selector_slider').addEventListener('MDCSlider:change', this.updateSlider.bind(this));
@@ -73,6 +76,7 @@ class AudienceSelector {
     params.push(['selected_event_email_campaign_count_id', this.selectedCountId]);
     params.push(['selected_audience_size', this.selectedAudienceSize]);
     params.push(['amount_in_cents', this.amountInCents]);
+    params.push(['discount_amount_in_cents', this.discountAmountInCents]);
     params.push(['location_description', this.shortAddress])
   }
 
@@ -182,6 +186,9 @@ class AudienceSelector {
     this.selectedCountId = this.audienceOptions[value].email_campaign_count_id;
     this.selectedAudienceSize = count;
     this.amountInCents = (count * this.cpm) / 1000;
+    if (this.discountCpm > 0) {
+      this.discountAmountInCents = this.amountInCents - (count * this.discountCpm) / 1000;
+    }
 
     if (radius > this.maxRadius) {
       this.subscriberLocationMsg.innerHTML = "'Opt-in' subscribers in the USA <span>&nbsp;</span>"
@@ -194,11 +201,16 @@ class AudienceSelector {
 
     this.subscriberCount.innerHTML = this.numberWithCommas(count);
     if (this.priceDisplay) {
+      console.log(this.amountInCents);
+      console.log(this.discountAmountInCents);
       let currencyFormat = new Intl.NumberFormat('en-US', {
         style: 'currency',
         currency: this.currencyCode,
       });
-      this.priceDisplay.innerHTML = currencyFormat.format(this.amountInCents / 100);
+      this.priceDisplay.innerHTML = currencyFormat.format((this.amountInCents - this.discountAmountInCents) / 100);
+      if (this.discountAmountInCents !== 0) {
+        this.originalPriceDisplay.innerHTML = currencyFormat.format(this.amountInCents / 100);
+      }
     }
 
     if (this.map) {

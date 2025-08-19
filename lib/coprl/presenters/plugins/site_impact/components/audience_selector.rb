@@ -7,9 +7,9 @@ module Coprl
       module SiteImpact
         module Components
           class AudienceSelector < DSL::Components::EventBase
-            attr_reader :audience_options, :audience_ready_url, :audience_pending_message, :zip_code, :cpm, :max_radius,
-                        :min_audience_selection, :max_audience_selection, :selected_count_id, :selected_audience_size,
-                        :external_price_element, :currency_code
+            attr_reader :audience_options, :audience_ready_url, :audience_pending_message, :zip_code, :cpm,
+                        :discount_cpm, :max_radius, :min_audience_selection, :max_audience_selection,
+                        :selected_count_id, :selected_audience_size, :external_price_element, :currency_code
 
             def initialize(**attribs, &block)
               @audience_options = attribs.delete(:audience_options){ [] }
@@ -17,6 +17,7 @@ module Coprl
               @audience_pending_message = attribs.delete(:audience_pending_message){ 'Please wait while we find your audience...' }
               @zip_code = attribs.delete(:zip_code)
               @cpm = attribs.delete(:cpm)
+              @discount_cpm = attribs.delete(:discount_cpm)
               @max_radius = attribs.delete(:max_radius)
               @selected_count_id = attribs.delete(:selected_count_id)
               @min_audience_selection = attribs.delete(:min_audience_selection){ 1 }
